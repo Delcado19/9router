@@ -28,14 +28,20 @@ function maskName(name) {
   return name;
 }
 
+function toJsonSafe(value) {
+  if (typeof value !== "bigint") return value;
+  const asNumber = Number(value);
+  return Number.isSafeInteger(asNumber) ? asNumber : value.toString();
+}
+
 function sanitize(c) {
   const safe = {};
-  for (const f of SAFE_FIELDS) if (c[f] !== undefined) safe[f] = c[f];
+  for (const f of SAFE_FIELDS) if (c[f] !== undefined) safe[f] = toJsonSafe(c[f]);
   if (safe.name) safe.name = maskName(safe.name);
   if (c.providerSpecificData) {
     const psd = {};
     for (const f of SAFE_PSD_FIELDS) {
-      if (c.providerSpecificData[f] !== undefined) psd[f] = c.providerSpecificData[f];
+      if (c.providerSpecificData[f] !== undefined) psd[f] = toJsonSafe(c.providerSpecificData[f]);
     }
     safe.providerSpecificData = psd;
   }
@@ -53,6 +59,16 @@ function parsePositiveInt(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function sortablePriority(value) {
+  if (value === null || value === undefined || value === "") return Number.MAX_SAFE_INTEGER;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : Number.MAX_SAFE_INTEGER;
+}
+
+function sortableText(value) {
+  return value == null ? "" : String(value);
+}
+
 function sortConnections(connections, sort) {
   const list = [...connections];
 
@@ -61,15 +77,15 @@ function sortConnections(connections, sort) {
       const orderA = USAGE_SUPPORTED_PROVIDERS.indexOf(a.provider);
       const orderB = USAGE_SUPPORTED_PROVIDERS.indexOf(b.provider);
       if (orderA !== orderB) return orderA - orderB;
-      return a.provider.localeCompare(b.provider);
+      return sortableText(a.provider).localeCompare(sortableText(b.provider));
     });
   }
 
   return list.sort((a, b) => {
-    const priorityA = a.priority ?? Number.MAX_SAFE_INTEGER;
-    const priorityB = b.priority ?? Number.MAX_SAFE_INTEGER;
+    const priorityA = sortablePriority(a.priority);
+    const priorityB = sortablePriority(b.priority);
     if (priorityA !== priorityB) return priorityA - priorityB;
-    return (a.provider || "").localeCompare(b.provider || "");
+    return sortableText(a.provider).localeCompare(sortableText(b.provider));
   });
 }
 
