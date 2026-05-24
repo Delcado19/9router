@@ -7,7 +7,7 @@ const SAFE_FIELDS = [
   "id", "provider", "authType", "name", "email", "displayName",
   "priority", "globalPriority", "isActive", "defaultModel",
   "testStatus", "lastError", "lastErrorAt", "errorCode",
-  "expiresAt", "lastUsedAt", "consecutiveUseCount",
+  "expiresAt", "rateLimitedUntil", "lastUsedAt", "consecutiveUseCount",
   "createdAt", "updatedAt",
 ];
 
@@ -69,6 +69,11 @@ function sortableText(value) {
   return value == null ? "" : String(value);
 }
 
+function sortableExpiryTime(connection) {
+  const timestamp = new Date(connection.expiresAt || connection.rateLimitedUntil || 0).getTime();
+  return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : Number.POSITIVE_INFINITY;
+}
+
 function sortConnections(connections, sort) {
   const list = [...connections];
 
@@ -77,6 +82,20 @@ function sortConnections(connections, sort) {
       const orderA = USAGE_SUPPORTED_PROVIDERS.indexOf(a.provider);
       const orderB = USAGE_SUPPORTED_PROVIDERS.indexOf(b.provider);
       if (orderA !== orderB) return orderA - orderB;
+      return sortableText(a.provider).localeCompare(sortableText(b.provider));
+    });
+  }
+
+  if (sort === "expiring") {
+    return list.sort((a, b) => {
+      // PR #1338 follow-up: this is connection-level expiry sorting. Full quota reset
+      // sorting would need provider quota fetches before pagination, which is broader.
+      const timeA = sortableExpiryTime(a);
+      const timeB = sortableExpiryTime(b);
+      if (timeA !== timeB) return timeA - timeB;
+      const priorityA = sortablePriority(a.priority);
+      const priorityB = sortablePriority(b.priority);
+      if (priorityA !== priorityB) return priorityA - priorityB;
       return sortableText(a.provider).localeCompare(sortableText(b.provider));
     });
   }
@@ -136,7 +155,10 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.log("Error fetching providers for client:", error);
-    return NextResponse.json({ error: "Failed to fetch providers" }, { status: 500 });
+    console.error("Error fetching providers for client:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch providers", details: error.message },
+      { status: 500 },
+    );
   }
 }
