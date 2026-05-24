@@ -2,6 +2,7 @@
 
 ## Fixes
 - OAuth: fix login flow on Windows
+- Messages API: keep `/v1/messages` non-streaming responses as JSON unless the client explicitly requests SSE (#1396)
 
 # v0.4.58 (2026-05-21)
 
