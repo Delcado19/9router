@@ -2,6 +2,7 @@
 
 ## Fixes
 - OAuth: fix login flow on Windows
+- CLI: include `sql.js` WASM in standalone builds so the SQLite fallback works (#1390)
 
 # v0.4.58 (2026-05-21)
 
