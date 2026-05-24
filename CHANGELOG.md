@@ -2,6 +2,7 @@
 
 ## Fixes
 - OAuth: fix login flow on Windows
+- Responses API: preserve Codex `apply_patch` as a custom tool call instead of JSON function-call arguments (#1371)
 
 # v0.4.58 (2026-05-21)
 
