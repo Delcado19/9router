@@ -2,6 +2,7 @@
 
 ## Fixes
 - OAuth: fix login flow on Windows
+- Combos: fall through on empty/malformed tool-heavy SSE responses instead of reporting success (#1382)
 
 # v0.4.58 (2026-05-21)
 
