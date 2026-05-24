@@ -2,6 +2,7 @@
 
 ## Fixes
 - OAuth: fix login flow on Windows
+- Codex: route bare `codex-auto-review` requests to Codex OAuth instead of OpenAI API-key credentials (#1398)
 
 # v0.4.58 (2026-05-21)
 

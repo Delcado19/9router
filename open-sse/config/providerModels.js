@@ -37,6 +37,7 @@ export const PROVIDER_MODELS = {
     { id: "claude-haiku-4-5-20251001", name: "Claude 4.5 Haiku" },
   ],
   cx: withCodexReviewModels([  // OpenAI Codex
+    { id: "codex-auto-review", name: "Codex Auto Review", quotaFamily: "review" },
     { id: "gpt-5.5", name: "GPT 5.5" },
     { id: "gpt-5.4", name: "GPT 5.4" },
     // GPT 5.3 Codex - all thinking levels
