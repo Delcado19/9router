@@ -9,6 +9,7 @@ import { getConsistentMachineId } from "../../src/shared/utils/machineId.js";
 
 // In-memory map: hash(machineId + first assistant content) → { sessionId, lastUsed }
 const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CODEX_DEFAULT_REASONING_EFFORT = "medium";
 const assistantSessionMap = new Map();
 
 // Cache machine ID at module level (resolved once)
@@ -194,7 +195,9 @@ export class CodexExecutor extends BaseExecutor {
 
     // Priority: explicit reasoning.effort > reasoning_effort param > model suffix > default (medium)
     if (!body.reasoning) {
-      const effort = body.reasoning_effort || modelEffort || 'low';
+      // #1417: Claude Code does not always send reasoning_effort, so keep
+      // Codex requests at the documented medium default unless configured.
+      const effort = body.reasoning_effort || modelEffort || CODEX_DEFAULT_REASONING_EFFORT;
       body.reasoning = { effort, summary: "auto" };
     } else if (!body.reasoning.summary) {
       body.reasoning.summary = "auto";

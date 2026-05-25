@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Codex: default missing reasoning effort to medium and expose GPT 5.5 effort variants for Claude Code CLI configs (#1417)
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
