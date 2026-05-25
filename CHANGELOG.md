@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Codex: include ChatGPT account context and relative reset parsing when loading Plus/Pro usage limits (#1407)
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
