@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Custom providers: delete imported model aliases with the provider node so stale aliases do not block re-import after recreating a provider with the same prefix (#1409).
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
