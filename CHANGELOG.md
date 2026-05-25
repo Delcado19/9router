@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Quota tracker: keep accounts active while any quota pool, such as Kiro credit_freetrial, still has capacity (#1328)
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
