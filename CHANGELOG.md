@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Combos: reject direct or indirect circular dependencies before saving so combo requests cannot recurse into themselves (#1235).
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
