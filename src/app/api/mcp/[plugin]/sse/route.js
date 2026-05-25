@@ -1,9 +1,14 @@
 import { registerSession, unregisterSession, findPlugin } from "@/lib/mcp/stdioSseBridge";
+import { isLocalOnlyRequest, localOnlyJsonError } from "@/lib/security/localOnly";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request, { params }) {
+  if (!isLocalOnlyRequest(request)) {
+    return localOnlyJsonError("Local only: MCP requires localhost access");
+  }
+
   const { plugin } = await params;
   if (!findPlugin(plugin)) {
     return new Response(`Unknown plugin: ${plugin}`, { status: 404 });

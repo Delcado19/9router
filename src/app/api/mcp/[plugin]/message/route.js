@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { sendToChild, findPlugin } from "@/lib/mcp/stdioSseBridge";
+import { isLocalOnlyRequest, localOnlyJsonError } from "@/lib/security/localOnly";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request, { params }) {
+  if (!isLocalOnlyRequest(request)) {
+    return localOnlyJsonError("Local only: MCP requires localhost access");
+  }
+
   const { plugin } = await params;
   if (!findPlugin(plugin)) {
     return NextResponse.json({ error: `Unknown plugin: ${plugin}` }, { status: 404 });

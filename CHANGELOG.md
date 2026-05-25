@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- MCP: enforce localhost-only access inside the SSE and message route handlers as defense in depth for local stdio plugins (#1114).
+
 # v0.4.59 (2026-05-21)
 
 ## Fixes
