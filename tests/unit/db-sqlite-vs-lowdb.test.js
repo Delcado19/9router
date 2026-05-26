@@ -18,6 +18,8 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
+  try { global._dbAdapter?.instance?.close?.(); } catch {}
+  delete global._dbAdapter;
   if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
   if (originalDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = originalDataDir;
@@ -199,6 +201,11 @@ describe("DB SQLite layer — public API parity", () => {
     expect(stats.byProvider.openai).toBeDefined();
     expect(stats.byProvider.openai.requests).toBeGreaterThanOrEqual(2);
     expect(stats.byProvider.openai.promptTokens).toBeGreaterThanOrEqual(300);
+
+    // Regression: getRecentLogs must await the async DB adapter before calling .all().
+    const logs = await sqliteDb.getRecentLogs(5);
+    expect(logs.length).toBeGreaterThanOrEqual(2);
+    expect(logs[0]).toContain("OPENAI");
   });
 
   it("usage: pending tracking in-memory", () => {
