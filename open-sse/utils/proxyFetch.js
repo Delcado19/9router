@@ -1,4 +1,5 @@
-// import { Readable } from "stream"; // unused — re-enable with got-scraping block below
+// #1451: DNS-bypass response wrappers call Readable.toWeb; Node does not expose Readable globally.
+import { Readable } from "node:stream";
 import { MEMORY_CONFIG } from "../config/runtimeConfig.js";
 import { dbg } from "./debugLog.js";
 
