@@ -1,6 +1,7 @@
 # v0.4.63 (2026-05-26)
 
 ## Fixes
+- Dashboard: keep the desktop sidebar visible even when Tailwind's `hidden lg:flex` cascade is not applied as expected (#1481)
 - proxyFetch: restore missing `Readable` import causing runtime `ReferenceError` in DNS-bypass fetch path
 
 ## Improvements
