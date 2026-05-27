@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- CLI: reset the dashboard password through the SQLite-backed settings API, with cross-platform offline SQLite recovery before falling back to legacy `db.json` (#1482)
+
 # v0.4.63 (2026-05-26)
 
 ## Fixes
