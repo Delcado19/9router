@@ -1,3 +1,8 @@
+# Unreleased
+
+## Fixes
+- Anthropic-compatible providers: strip Claude Code `context_management` before forwarding to gateways that reject unknown top-level fields (#1468)
+
 # v0.4.63 (2026-05-26)
 
 ## Fixes
