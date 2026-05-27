@@ -1,6 +1,7 @@
 # v0.4.63 (2026-05-26)
 
 ## Fixes
+- Anthropic: deduplicate `anthropic-version` header variants so requests are not rejected as `"2023-06-01, 2023-06-01"` (#1475)
 - proxyFetch: restore missing `Readable` import causing runtime `ReferenceError` in DNS-bypass fetch path
 
 ## Improvements
