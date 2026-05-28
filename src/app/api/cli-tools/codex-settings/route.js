@@ -140,10 +140,11 @@ export async function POST(request) {
       base_url: normalizedBaseUrl,
       wire_api: "responses",
     });
-
-    // Add subagent configuration
+    // Add subagent configuration.
+    // Codex validates agent roles and warns when a role (e.g. subagent) has no description.
     const effectiveSubagentModel = subagentModel || model;
     setNestedSection(parsed, "agents.subagent", {
+      description: "Subagent used for focused codebase exploration tasks.",
       model: effectiveSubagentModel,
     });
 
