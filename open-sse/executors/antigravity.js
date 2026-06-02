@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { BaseExecutor } from "./base.js";
 import { PROVIDERS } from "../config/providers.js";
 import { OAUTH_ENDPOINTS, ANTIGRAVITY_HEADERS, AG_DEFAULT_TOOLS, AG_TOOL_SUFFIX } from "../config/appConstants.js";
-import { getAntigravityMetadata } from "../utils/antigravityClientIdentity.js";
+// getAntigravityMetadata removed — AG API rejects unknown "metadata" field at request
 import { HTTP_STATUS } from "../config/runtimeConfig.js";
 import { deriveSessionId } from "../utils/sessionManager.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
@@ -84,7 +84,6 @@ export class AntigravityExecutor extends BaseExecutor {
     }
 
     const { tools: _originalTools, toolConfig: _originalToolConfig, ...requestWithoutTools } = body.request || {};
-    const metadata = getAntigravityMetadata(requestWithoutTools.metadata || {});
     const generationConfig = { ...(requestWithoutTools.generationConfig || {}) };
     if (generationConfig.maxOutputTokens > MAX_ANTIGRAVITY_OUTPUT_TOKENS) {
       generationConfig.maxOutputTokens = MAX_ANTIGRAVITY_OUTPUT_TOKENS;
@@ -92,7 +91,6 @@ export class AntigravityExecutor extends BaseExecutor {
 
     const transformedRequest = {
       ...requestWithoutTools,
-      metadata,
       generationConfig,
       ...(contents && { contents }),
       ...(tools && { tools }),
