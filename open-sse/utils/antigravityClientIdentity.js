@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import { arch, platform } from "node:os";
+import fs from "fs";
+import { arch, platform } from "os";
 
 export const FALLBACK_ANTIGRAVITY_IDE_VERSION = "1.23.2";
 
