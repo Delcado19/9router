@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { BaseExecutor } from "./base.js";
 import { PROVIDERS } from "../config/providers.js";
-import { OAUTH_ENDPOINTS, ANTIGRAVITY_HEADERS, INTERNAL_REQUEST_HEADER, AG_DEFAULT_TOOLS, AG_TOOL_SUFFIX } from "../config/appConstants.js";
+import { OAUTH_ENDPOINTS, ANTIGRAVITY_HEADERS, AG_DEFAULT_TOOLS, AG_TOOL_SUFFIX } from "../config/appConstants.js";
+import { getAntigravityMetadata } from "../utils/antigravityClientIdentity.js";
 import { HTTP_STATUS } from "../config/runtimeConfig.js";
 import { deriveSessionId } from "../utils/sessionManager.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
@@ -35,14 +36,16 @@ export class AntigravityExecutor extends BaseExecutor {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${credentials.accessToken}`,
       "User-Agent": this.config.headers?.["User-Agent"] || ANTIGRAVITY_HEADERS["User-Agent"],
-      [INTERNAL_REQUEST_HEADER.name]: INTERNAL_REQUEST_HEADER.value,
       ...(sessionId && { "X-Machine-Session-Id": sessionId }),
       "Accept": stream ? "text/event-stream" : "application/json"
     };
   }
 
   transformRequest(model, body, stream, credentials) {
-    const projectId = credentials?.projectId || this.generateProjectId();
+    const projectId = credentials?.projectId;
+    if (!projectId) {
+      throw new Error("Antigravity credentials are missing projectId; reconnect the account to complete loadCodeAssist/onboardUser");
+    }
 
     // Fix contents for Claude models via Antigravity
     const contents = body.request?.contents?.map(c => {
@@ -81,6 +84,7 @@ export class AntigravityExecutor extends BaseExecutor {
     }
 
     const { tools: _originalTools, toolConfig: _originalToolConfig, ...requestWithoutTools } = body.request || {};
+    const metadata = getAntigravityMetadata(requestWithoutTools.metadata || {});
     const generationConfig = { ...(requestWithoutTools.generationConfig || {}) };
     if (generationConfig.maxOutputTokens > MAX_ANTIGRAVITY_OUTPUT_TOKENS) {
       generationConfig.maxOutputTokens = MAX_ANTIGRAVITY_OUTPUT_TOKENS;
@@ -88,6 +92,7 @@ export class AntigravityExecutor extends BaseExecutor {
 
     const transformedRequest = {
       ...requestWithoutTools,
+      metadata,
       generationConfig,
       ...(contents && { contents }),
       ...(tools && { tools }),
