@@ -70,3 +70,18 @@ describe("antigravityClientIdentity", () => {
     expect(mod.getAntigravityUserAgent()).not.toContain("1.107.0");
   });
 });
+
+describe("Antigravity exported constants", () => {
+  it("uses the shared identity for app constants and provider config", async () => {
+    const productJson = writeTempProductJson({ ideVersion: "7.7.7", version: "1.107.0" });
+    process.env.ANTIGRAVITY_PRODUCT_JSON = productJson;
+    vi.resetModules();
+
+    const appConstants = await import("../../open-sse/config/appConstants.js");
+    const providers = await import("../../open-sse/config/providers.js");
+
+    expect(appConstants.getPlatformUserAgent()).toMatch(/^antigravity\/7\.7\.7 /);
+    expect(appConstants.ANTIGRAVITY_HEADERS["User-Agent"]).toMatch(/^antigravity\/7\.7\.7 /);
+    expect(providers.PROVIDERS.antigravity.headers["User-Agent"]).toMatch(/^antigravity\/7\.7\.7 /);
+  });
+});
