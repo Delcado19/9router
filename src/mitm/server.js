@@ -12,6 +12,7 @@ const { DATA_DIR, MITM_DIR } = require("./paths");
 const { getCertForDomain } = require("./cert/generate");
 const { getMitmAlias } = require("./dbReader");
 const { applyAntigravityIdeVersionOverride } = require("./antigravityIdeVersion");
+const { stripInternalRequestHeaders } = require("./headerFidelity");
 const LOCAL_PORT = 443;
 const IS_WIN = process.platform === "win32";
 const ENABLE_FILE_LOG = IS_DEV;
@@ -142,7 +143,7 @@ async function passthrough(req, res, bodyBuffer, onResponse) {
     ? applyAntigravityIdeVersionOverride(bodyBuffer, req.headers)
     : { bodyBuffer, headers: req.headers };
   const bodyForForwarding = versionOverride.bodyBuffer;
-  const headersForForwarding = { ...versionOverride.headers, host: targetHost };
+  const headersForForwarding = stripInternalRequestHeaders({ ...versionOverride.headers, host: targetHost });
   if (bodyForForwarding !== bodyBuffer) {
     headersForForwarding["content-length"] = String(bodyForForwarding.length);
   }
