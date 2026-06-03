@@ -27,4 +27,17 @@ describe("Kiro MITM model slots", () => {
     expect(simpleTask).toBeTruthy();
     expect(simpleTask.alias).toBe("simple-task");
   });
+
+  // The models Kiro sends automatically are flagged mandatory so the dashboard can mark them.
+  it.each(["auto", "simple-task"])("flags auto-sent slot '%s' as mandatory", (id) => {
+    expect(kiro.defaultModels.find((m) => m.id === id)?.mandatory).toBe(true);
+  });
+
+  // Explicit user-picked models are optional (only sent when chosen), so must NOT be mandatory.
+  it.each(["claude-sonnet-4.5", "deepseek-3.2", "minimax-m2.1"])(
+    "leaves explicit-pick slot '%s' optional",
+    (id) => {
+      expect(kiro.defaultModels.find((m) => m.id === id)?.mandatory).toBeFalsy();
+    }
+  );
 });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, Button, Badge, Input, ModelSelectModal } from "@/shared/components";
+import Tooltip from "@/shared/components/Tooltip";
 import { TOOL_HOSTS } from "@/shared/constants/mitmToolHosts";
 import Image from "next/image";
 
@@ -170,7 +171,7 @@ export default function MitmToolCard({
             {mitmHosts.length > 0 && (
               <div className="mt-2 rounded-md border border-border bg-surface/50 px-2 py-1.5">
                 <p className="text-[10px] font-medium tracking-wide text-text-main/80 mb-1">
-                  Edit hosts file manually to add the following entries:
+                  9Router adds and removes these hosts entries automatically when you toggle DNS — no manual edit needed:
                 </p>
                 <ul className="list-none space-y-0.5 font-mono text-[10px] text-text-muted break-all">
                   {mitmHosts.map((h) => (
@@ -182,6 +183,12 @@ export default function MitmToolCard({
             {/* Info */}
             <div className="flex flex-col gap-0.5 text-[11px] text-text-muted px-1">
               <p>Toggle DNS to redirect {tool.name} traffic through 9Router via MITM.</p>
+              <p>Any model you leave unmapped is sent to the original provider instead of being routed to your chosen model.</p>
+              {tool.defaultModels?.some((m) => m.mandatory) && (
+                <p className="text-[10px] mt-0.5">
+                  <span className="text-amber-500 font-bold">*</span> Sent automatically (default / Auto mode) — map these so your normal requests get routed.
+                </p>
+              )}
               {!dnsActive && (
                 <p className="text-amber-600 text-[10px] mt-1">
                   ⚠️ Enable DNS to edit model mappings
@@ -194,7 +201,14 @@ export default function MitmToolCard({
               <div className="flex flex-col gap-2">
                 {tool.defaultModels.map((model) => (
                   <div key={model.alias} className="grid grid-cols-1 gap-1.5 sm:grid-cols-[9rem_auto_1fr_auto] sm:items-center sm:gap-2">
-                    <span className="text-xs font-semibold text-text-main sm:text-right">{model.name}</span>
+                    <span className="flex items-center gap-1 text-xs font-semibold text-text-main sm:justify-end sm:text-right">
+                      {model.name}
+                      {model.mandatory && (
+                        <Tooltip text="Sent automatically (default / Auto mode). If left empty, this request is sent to the original provider instead of your chosen model.">
+                          <span className="text-amber-500 font-bold cursor-help" aria-label="sent automatically by this tool">*</span>
+                        </Tooltip>
+                      )}
+                    </span>
                     <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
                     <div className="relative w-full min-w-0">
                       <input
@@ -204,7 +218,7 @@ export default function MitmToolCard({
                         onBlur={(e) => handleMappingBlur(model.alias, e.target.value)}
                         placeholder="provider/model-id"
                         disabled={!dnsActive}
-                        className={`w-full min-w-0 pl-2 pr-7 py-2 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5 ${!dnsActive ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`w-full min-w-0 pl-2 pr-7 py-2 bg-surface rounded border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5 ${model.mandatory && dnsActive && !modelMappings[model.alias] ? "border-amber-500/60" : "border-border"} ${!dnsActive ? "opacity-50 cursor-not-allowed" : ""}`}
                       />
                       {modelMappings[model.alias] && (
                         <button

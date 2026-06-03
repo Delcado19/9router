@@ -40,9 +40,13 @@ export const MITM_TOOLS = {
       // call is passed through to GitHub Copilot instead of the configured provider —
       // and gpt-5-mini is the CLI default, so the primary turn leaks (same class as the
       // Kiro "auto" misrouting). gpt-4o / gpt-4.1 are kept for the VS Code Copilot Chat picker.
-      { id: "gpt-5-mini", name: "GPT-5 mini", alias: "gpt-5-mini" },
-      { id: "gpt-5.4-nano", name: "GPT-5.4 nano", alias: "gpt-5.4-nano" },
-      { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", alias: "claude-haiku-4.5" },
+      // `mandatory: true` = sent by the Copilot CLI's default/"Auto" operation (gpt-5-mini is
+      // the default, gpt-5.4-nano + claude-haiku-4.5 are dispatched by "Auto"), so the dashboard
+      // marks them; leaving them unmapped passes that traffic through to GitHub Copilot. gpt-4o /
+      // gpt-4.1 are optional VS Code Copilot Chat picks.
+      { id: "gpt-5-mini", name: "GPT-5 mini", alias: "gpt-5-mini", mandatory: true },
+      { id: "gpt-5.4-nano", name: "GPT-5.4 nano", alias: "gpt-5.4-nano", mandatory: true },
+      { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", alias: "claude-haiku-4.5", mandatory: true },
       { id: "gpt-4o", name: "GPT-4o", alias: "gpt-4o" },
       { id: "gpt-4.1", name: "GPT-4.1", alias: "gpt-4.1" },
     ],
@@ -60,13 +64,16 @@ export const MITM_TOOLS = {
       // for background sub-tasks (verified via MITM request dump of generateAssistantResponse).
       // Both need a mappable slot — otherwise getMappedModel returns null and the chat call
       // is passed through to AWS instead of being routed to the chosen provider.
-      { id: "auto", name: "Auto (Kiro Agent)", alias: "auto" },
+      // `mandatory: true` flags the slots Kiro sends automatically (so the dashboard marks
+      // them) — leaving them unmapped passes that default traffic through to AWS. The named
+      // models below are only sent when the user explicitly picks them, so they're optional.
+      { id: "auto", name: "Auto (Kiro Agent)", alias: "auto", mandatory: true },
       { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", alias: "claude-sonnet-4.5" },
       { id: "claude-sonnet-4", name: "Claude Sonnet 4", alias: "claude-sonnet-4" },
       { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", alias: "claude-haiku-4.5" },
       { id: "deepseek-3.2", name: "DeepSeek 3.2", alias: "deepseek-3.2" },
       { id: "minimax-m2.1", name: "MiniMax M2.1", alias: "minimax-m2.1" },
-      { id: "simple-task", name: "Qwen3 Coder Next", alias: "simple-task" },
+      { id: "simple-task", name: "Qwen3 Coder Next", alias: "simple-task", mandatory: true },
     ],
   },
   // cursor: {

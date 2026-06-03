@@ -16,13 +16,20 @@ describe("Copilot MITM model slots", () => {
     expect(Array.isArray(copilot.defaultModels)).toBe(true);
   });
 
-  // Each modelId the Copilot CLI actually sends on the wire must have a mappable slot.
+  // Each modelId the Copilot CLI actually sends on the wire must have a mappable slot,
+  // and is flagged mandatory (default / Auto mode) so the dashboard can mark it.
   it.each(["gpt-5-mini", "gpt-5.4-nano", "claude-haiku-4.5"])(
-    "offers a mappable slot for wire modelId '%s'",
+    "offers a mandatory mappable slot for wire modelId '%s'",
     (id) => {
       const slot = copilot.defaultModels.find((m) => m.id === id);
       expect(slot).toBeTruthy();
       expect(slot.alias).toBe(id);
+      expect(slot.mandatory).toBe(true);
     }
   );
+
+  // VS Code-only optional picks must NOT be flagged mandatory (the CLI never sends them).
+  it.each(["gpt-4o", "gpt-4.1"])("leaves optional slot '%s' non-mandatory", (id) => {
+    expect(copilot.defaultModels.find((m) => m.id === id)?.mandatory).toBeFalsy();
+  });
 });
