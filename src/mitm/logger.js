@@ -30,6 +30,40 @@ function slugify(s, max = 80) {
   return String(s).replace(/[^a-zA-Z0-9]/g, "_").substring(0, max);
 }
 
+// Opt-in MITM dumps must never persist live secrets (auth tokens, cookies, API keys).
+// Mirrors open-sse/utils/requestLogger.js but is kept self-contained: the mitm bundle is
+// runtime-copied into DATA_DIR with no cross-tree require allowed (see manager.js copy logic).
+const SENSITIVE_HEADER_PATTERNS = [
+  "authorization", "proxy-authorization", "api-key", "apikey", "x-api-key",
+  "x-key", "cookie", "set-cookie", "token", "secret", "password", "credential",
+];
+
+function maskToken(text) {
+  if (text.length <= 8) return "[REDACTED]";
+  if (text.length <= 20) return `${text.slice(0, 4)}...[REDACTED]`;
+  return `${text.slice(0, 8)}...[REDACTED]...${text.slice(-4)}`;
+}
+
+function maskHeaderValue(value) {
+  if (Array.isArray(value)) return value.map(maskHeaderValue);
+  if (value === undefined || value === null) return value;
+  const text = String(value);
+  if (!text) return text;
+  const bearer = text.match(/^(Bearer|Token|Basic)\s+(.+)$/i);
+  return bearer ? `${bearer[1]} ${maskToken(bearer[2])}` : maskToken(text);
+}
+
+function maskSensitiveHeaders(headers) {
+  if (!headers) return {};
+  const masked = { ...headers };
+  for (const key of Object.keys(masked)) {
+    if (SENSITIVE_HEADER_PATTERNS.some(p => key.toLowerCase().includes(p))) {
+      masked[key] = maskHeaderValue(masked[key]);
+    }
+  }
+  return masked;
+}
+
 function isBlacklisted(url) {
   if (!url) return false;
   return LOG_BLACKLIST_URL_PARTS.some(part => url.includes(part));
@@ -60,7 +94,7 @@ function dumpRequest(req, bodyBuffer, tag = "raw") {
       method: req.method,
       url: req.url,
       host: req.headers.host,
-      headers: req.headers,
+      headers: maskSensitiveHeaders(req.headers),
       body: parsed ?? bodyBuffer.toString("utf8")
     }, null, 2));
     return file;
@@ -91,8 +125,8 @@ function createResponseDumper(req, tag = "raw") {
         const text = decoded.toString("utf8");
         // Skip empty / trivially-empty bodies
         if (EMPTY_BODY_RE.test(text)) return;
-        // Strip content-encoding since body is now decoded
-        const cleanHeaders = { ...headers };
+        // Strip content-encoding since body is now decoded; mask secrets (e.g. set-cookie)
+        const cleanHeaders = maskSensitiveHeaders(headers);
         delete cleanHeaders["content-encoding"];
         delete cleanHeaders["Content-Encoding"];
         const out = `STATUS: ${status}\nHEADERS: ${JSON.stringify(cleanHeaders, null, 2)}\n---BODY---\n${text}`;
@@ -103,4 +137,4 @@ function createResponseDumper(req, tag = "raw") {
   };
 }
 
-module.exports = { log, err, dumpRequest, createResponseDumper, clearDumpDir };
+module.exports = { log, err, dumpRequest, createResponseDumper, clearDumpDir, maskSensitiveHeaders };
