@@ -86,6 +86,7 @@
 - Add new models: Claude Opus 4.8 (Claude Code), GPT 5.4 Mini (Codex)
 
 ## Fixes
+- MITM diagnostics: opt-in request/response dumps via `MITM_FILE_LOG=1` (the intercepted child always runs `NODE_ENV=production`, so the dev-only file log never fired in a normal install). Dumped request/response headers are now masked (auth tokens, cookies, API keys), and any model that has no mapping and falls through to the tool's real upstream is logged live (`⚠️ passthrough <tool>: model="…" has no mapping`) — making silent misrouting visible for any MITM tool.
 - MITM runtime copy: include the shared MITM host contract required by `dnsConfig.js` so the data-dir server can resolve `../../shared/constants/mitmToolHosts.js`. Self-heal a missing copy even when `server.js` is unchanged (older runtimes left it out, crashing the server with `MODULE_NOT_FOUND`).
 - MITM runtime process: preserve access to bundled `node_modules` for external dependencies such as `node-forge` when the server is launched from the data-dir runtime copy.
 - MITM standalone start: copy the full `src/mitm` tree into the runtime copy so `server.js` can still resolve local requires like `./logger`.

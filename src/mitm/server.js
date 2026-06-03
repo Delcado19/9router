@@ -14,7 +14,11 @@ const { getMitmAlias } = require("./dbReader");
 const { applyAntigravityIdeVersionOverride } = require("./antigravityIdeVersion");
 const LOCAL_PORT = 443;
 const IS_WIN = process.platform === "win32";
-const ENABLE_FILE_LOG = IS_DEV;
+// Opt-in request/response dumps. The MITM child is ALWAYS spawned with
+// NODE_ENV=production (manager.js buildMitmChildEnv), so IS_DEV is false even when
+// the parent app runs in dev mode — set MITM_FILE_LOG=1 to capture in any mode.
+// Dumps land in DATA_DIR/logs/mitm; sensitive headers are masked (see logger.js).
+const ENABLE_FILE_LOG = IS_DEV || process.env.MITM_FILE_LOG === "1";
 
 // Clear stale dump files on every MITM start (prevents unbounded disk usage)
 clearDumpDir();
@@ -363,6 +367,11 @@ const server = https.createServer(sslOptions, async (req, res) => {
 
     const mappedModel = getMappedModel(tool, model);
     if (!mappedModel) {
+      // No slot/alias/synonym/pattern matched this modelId → the request is NOT
+      // routed to the configured provider but leaks to the tool's real upstream.
+      // This is exactly the Kiro "auto" class of misrouting; surface it live so
+      // unmapped models are visible instead of silently consuming upstream quota.
+      log(`⚠️ passthrough ${tool}: model="${model ?? "?"}" has no mapping → leaking to real upstream`);
       return passthrough(req, res, bodyBuffer);
     }
 
