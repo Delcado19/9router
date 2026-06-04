@@ -24,7 +24,13 @@ afterEach(() => {
 });
 
 describe("AntigravityExecutor protocol fidelity", () => {
-  it("adds Antigravity ideVersion metadata to direct upstream requests", async () => {
+  // Regression guard for 313ea98: the AG API rejects an injected request-level
+  // `metadata` field with INVALID_ARGUMENT, so transformRequest must NOT compute
+  // and add ideVersion (or any other) metadata. Caller-provided metadata passes
+  // through untouched, but the executor adds nothing of its own. IDE-version
+  // fidelity is carried by the User-Agent (getAntigravityUserAgent), not by a
+  // request-body metadata field.
+  it("does not inject computed ideVersion metadata into upstream requests", async () => {
     const { AntigravityExecutor } = await loadExecutorWithVersion("6.6.6");
     const executor = new AntigravityExecutor();
 
@@ -40,11 +46,10 @@ describe("AntigravityExecutor protocol fidelity", () => {
       email: "user@example.com"
     });
 
-    expect(transformed.request.metadata).toMatchObject({
-      ideName: "antigravity",
-      existing: true,
-      ideVersion: "6.6.6"
-    });
+    // Caller's metadata is preserved verbatim …
+    expect(transformed.request.metadata).toEqual({ ideName: "antigravity", existing: true });
+    // … but the executor must not inject an ideVersion field of its own.
+    expect(transformed.request.metadata).not.toHaveProperty("ideVersion");
   });
 
   it("does not fabricate a project id when credentials have a real project id", async () => {
