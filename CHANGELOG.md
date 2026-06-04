@@ -5,6 +5,7 @@
 - Add new models: Claude Opus 4.8 (Claude Code), GPT 5.4 Mini (Codex)
 
 ## Fixes
+- Antigravity protocol fidelity: make 9Router's upstream Antigravity traffic match the installed IDE client. Uses the production `cloudcode-pa.googleapis.com` host (not the `daily-`/sandbox dev host), derives the `User-Agent` and `request.metadata.ideVersion` from the installed IDE version instead of a hardcoded string, requires the real `cloudaicompanionProject` id, keeps internal headers (e.g. `x-request-source`) off upstream requests, and reads the OAuth client secret from `ANTIGRAVITY_OAUTH_CLIENT_SECRET` (with the known secret kept as fallback). Adopted from upstream PR #1615 (antigravity-only commits; the unrelated caveman/wenyan, DeepSeek-1M, CI and build-script changes from that branch were not taken).
 - DeepSeek thinking mode: echo `reasoning_content` back on follow-up/tool-call turns so OpenCode-free and custom providers no longer 400 with "reasoning_content must be passed back" (#1543)
 - Reasoning injector: match deepseek/kimi model ids case-insensitively (covers custom providers using capitalized model names)
 - OpenCode suggested-models: include free models without the `-free` suffix, e.g. `big-pickle` (#1535)
