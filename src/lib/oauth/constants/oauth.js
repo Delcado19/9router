@@ -93,9 +93,11 @@ export const IFLOW_CONFIG = {
 };
 
 // Antigravity OAuth Configuration (Standard OAuth2 with Google)
+// clientSecret must come from the environment — never committed (used server-side
+// only, in the token-exchange flow). Set ANTIGRAVITY_OAUTH_CLIENT_SECRET to enable.
 export const ANTIGRAVITY_CONFIG = {
   clientId: "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com",
-  clientSecret: "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",
+  clientSecret: process.env.ANTIGRAVITY_OAUTH_CLIENT_SECRET || "",
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   userInfoUrl: "https://www.googleapis.com/oauth2/v1/userinfo",
