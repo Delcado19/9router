@@ -1,5 +1,10 @@
 import { platform, arch } from "os";
 import { KIRO_IDE_VERSION } from "./appConstants.js";
+import { getAntigravityUserAgent } from "../utils/antigravityClientIdentity.js";
+
+// Antigravity OAuth client secret must come from the environment — never committed.
+// (Upstream PR #1615.) Empty default means the flow requires ANTIGRAVITY_OAUTH_CLIENT_SECRET.
+const ANTIGRAVITY_OAUTH_CLIENT_SECRET = process.env.ANTIGRAVITY_OAUTH_CLIENT_SECRET || "";
 
 // === OS/Arch helpers ===
 function mapStainlessOs() {
@@ -113,13 +118,12 @@ export const PROVIDERS = {
   },
   antigravity: {
     baseUrls: [
-      "https://daily-cloudcode-pa.googleapis.com",
-      "https://daily-cloudcode-pa.sandbox.googleapis.com",
+      "https://cloudcode-pa.googleapis.com",
     ],
     format: "antigravity",
-    headers: { "User-Agent": `antigravity/1.107.0 ${platform()}/${arch()}` },
+    headers: { "User-Agent": getAntigravityUserAgent() },
     clientId: "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com",
-    clientSecret: "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"
+    clientSecret: ANTIGRAVITY_OAUTH_CLIENT_SECRET
   },
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1/chat/completions",

@@ -1,4 +1,5 @@
 import { platform, arch } from "os";
+import { getAntigravityUserAgent } from "../utils/antigravityClientIdentity.js";
 
 // === Gemini CLI ===
 export const GEMINI_CLI_VERSION = "0.34.0";
@@ -67,7 +68,7 @@ export function getPlatformEnum() {
 }
 
 export function getPlatformUserAgent() {
-  return `antigravity/1.104.0 ${platform()}/${arch()}`;
+  return getAntigravityUserAgent();
 }
 
 export const CLIENT_METADATA = {
@@ -137,7 +138,7 @@ export const AG_DEFAULT_TOOLS = new Set([
 
 // Antigravity chat/stream headers
 export const ANTIGRAVITY_HEADERS = {
-  "User-Agent": `antigravity/1.107.0 ${platform()}/${arch()}`
+  "User-Agent": getAntigravityUserAgent()
 };
 
 // Cloud Code Assist API
